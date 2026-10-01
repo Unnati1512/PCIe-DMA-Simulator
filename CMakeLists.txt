@@ -10,6 +10,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(pcie_dma_simulator
-	src/main.cpp
+    src/main.cpp
+    src/simulator/simulator.cpp
+)
+
+target_include_directories(pcie_dma_simulator
+    PRIVATE
+        include
 )
 
