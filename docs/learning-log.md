@@ -25,3 +25,16 @@ Multiple hardware events may occur at the same cycle. Giving each event a sequen
 ### What did I build today?
 
 I implemented the event-driven simulation framework that will provide the timing infrastructure for the PCIe DMA subsystem simulator.
+
+
+## Day 4 — DMA Controller FSM
+
+Today I implemented the DMA controller as an event-driven finite state machine.
+The controller processes descriptors from the DMA descriptor ring through
+FETCH_DESCRIPTOR, TRANSLATE_ADDRESS, GENERATE_REQUEST, WAIT_COMPLETION,
+UPDATE_DESCRIPTOR, DONE, and ERROR states. I used identity address translation
+for this stage because the actual IOMMU and TLB model will be implemented later.
+The completion event is simulated through the event-driven simulator, allowing
+the controller to wait for a future simulation cycle instead of blocking real time.
+I also verified that multiple descriptors are processed sequentially and that
+invalid descriptors are rejected before entering the DMA controller.

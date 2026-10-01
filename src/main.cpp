@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "dma/dma_controller.hpp"
 #include "dma/descriptor_ring.hpp"
 #include "simulator/simulator.hpp"
 
@@ -19,46 +20,28 @@ int main() {
 
     std::cout << "Starting PCIe DMA simulation\n";
 
-    if (ring.submit(descriptor)) {
-        std::cout << "Cycle "
-                  << simulator.now()
-                  << ": DMA descriptor submitted\n";
+    if (!ring.submit(descriptor)) {
+        std::cerr << "Failed to submit DMA descriptor\n";
+        return 1;
     }
 
-    simulator.schedule(10, [&]() {
-        const dma::Descriptor& current = ring.front();
+    std::cout << "Descriptor submitted to DMA ring\n";
 
-        std::cout << "Cycle "
-                  << simulator.now()
-                  << ": DMA descriptor ready\n";
+    dma::DmaController controller(
+        simulator,
+        ring
+    );
 
-        std::cout << "  Source: 0x"
-                  << std::hex
-                  << current.source_address
-                  << '\n';
-
-        std::cout << "  Destination: 0x"
-                  << current.destination_address
-                  << '\n';
-
-        std::cout << std::dec
-                  << "  Length: "
-                  << current.length
-                  << " bytes\n";
-    });
-
-    simulator.schedule(20, [&]() {
-        ring.consume();
-
-        std::cout << "Cycle "
-                  << simulator.now()
-                  << ": DMA descriptor completed\n";
-    });
+    controller.start();
 
     simulator.run();
 
-    std::cout << "Simulation finished at cycle "
+    std::cout << "\nSimulation finished at cycle "
               << simulator.now()
+              << '\n';
+
+    std::cout << "Descriptors completed: "
+              << controller.descriptors_completed()
               << '\n';
 
     return 0;

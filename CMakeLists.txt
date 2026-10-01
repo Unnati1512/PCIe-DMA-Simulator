@@ -15,6 +15,7 @@ add_executable(pcie_dma_simulator
     src/memory/memory.cpp
     src/dma/descriptor_ring.cpp
     src/dma/descriptor_validator.cpp
+    src/dma/dma_controller.cpp
 )
 
 target_include_directories(pcie_dma_simulator
