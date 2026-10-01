@@ -19,9 +19,11 @@ add_executable(pcie_dma_simulator
     src/pcie/tlp_utils.cpp
     src/pcie/outstanding_requests.cpp
     src/pcie/tlp_generator.cpp
+    src/pcie/interrupt_coalescer.cpp
     src/pcie/tlp_printer.cpp
     src/pcie/transaction_engine.cpp
     src/pcie/link.cpp
+    src/pcie/msix.cpp
     src/pcie/tlp_fragmenter.cpp
     src/dma/scatter_gather.cpp
     src/dma/scatter_gather_engine.cpp

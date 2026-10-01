@@ -170,3 +170,24 @@ A concurrency experiment verified the request tracker at concurrency levels
 of 1, 2, 4, 8, 16, 32, and 64 outstanding requests. This establishes the
 foundation for later performance experiments involving request concurrency,
 latency hiding, and PCIe throughput.
+
+
+## Day 11 — MSI-X and Interrupt Coalescing
+
+Today I implemented an architectural model of MSI-X interrupt delivery for
+the PCIe DMA subsystem. The model represents multiple interrupt vectors and
+allows completion events to trigger a selected MSI-X vector.
+
+I then implemented interrupt coalescing to model the tradeoff between
+interrupt frequency and completion notification latency. Threshold-based
+coalescing groups multiple DMA completions and generates an interrupt after
+a configurable number of completions.
+
+Timer-based coalescing was also implemented. When completions arrive but the
+coalescing threshold has not been reached, a timer can generate the
+interrupt after a configurable delay.
+
+The tests verified direct MSI-X delivery, threshold-based coalescing, and
+timer-based coalescing. With a threshold of four, eight completions generated
+two interrupts instead of eight. This establishes the foundation for later
+performance experiments comparing interrupt rate and notification latency.
