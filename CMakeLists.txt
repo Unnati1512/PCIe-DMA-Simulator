@@ -21,6 +21,7 @@ add_executable(pcie_dma_simulator
     src/pcie/tlp_printer.cpp
     src/pcie/transaction_engine.cpp
     src/pcie/link.cpp
+    src/pcie/tlp_fragmenter.cpp
 )
 
 target_include_directories(pcie_dma_simulator

@@ -75,3 +75,24 @@ link utilization.
 This implementation is an architectural model of PCIe transaction/link
 behavior and does not implement the physical layer or a complete PCIe
 protocol stack.
+
+
+## Day 7 — TLP Fragmentation, MPS, MRRS and 4-KB Boundaries
+
+Today I implemented a PCIe TLP fragmentation model for large DMA transfers.
+The fragmenter uses Maximum Payload Size (MPS) for Memory Write transactions
+and Maximum Read Request Size (MRRS) for Memory Read requests.
+
+A large transfer is divided into multiple TLPs so that no individual request
+exceeds its configured size limit. The fragmenter also prevents a memory
+request from crossing a 4-KB address boundary. For example, a 4096-byte
+Memory Write with an MPS of 256 bytes is divided into 16 TLPs, while a
+4096-byte Memory Read with an MRRS of 512 bytes is divided into 8 requests.
+
+The 4-KB boundary logic was also tested using a transfer beginning at address
+0x1F80. Because only 128 bytes remain before the 0x2000 boundary, the transfer
+is fragmented into 128, 256, and 128-byte TLPs.
+
+This provides the foundation for modeling realistic PCIe transaction
+fragmentation and will later allow DMA performance experiments to study the
+effects of MPS, MRRS, transfer size, and request boundaries.
