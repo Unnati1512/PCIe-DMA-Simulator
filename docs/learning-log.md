@@ -96,3 +96,25 @@ is fragmented into 128, 256, and 128-byte TLPs.
 This provides the foundation for modeling realistic PCIe transaction
 fragmentation and will later allow DMA performance experiments to study the
 effects of MPS, MRRS, transfer size, and request boundaries.
+
+
+## Day 8 — Scatter-Gather DMA
+
+Today I implemented a scatter-gather DMA model for handling logically
+contiguous transfers that are backed by multiple physically non-contiguous
+memory segments. A scatter-gather list stores the physical address and length
+of each segment while preserving the total logical transfer size.
+
+I implemented a scatter-gather engine that walks the segment list and converts
+each segment into PCIe Memory Write TLPs through the existing TLP fragmenter.
+This keeps the scatter-gather layer separate from PCIe transaction
+fragmentation.
+
+The implementation was tested with four non-contiguous segments totaling
+12288 bytes. With an MPS of 256 bytes, the segments generated 16, 16, 8, and
+8 TLPs respectively, for a total of 48 Memory Write TLPs. The tests also
+verified that each TLP respects the MPS limit, begins at the correct physical
+address for each segment, and receives an ordered tag.
+
+Zero-length scatter-gather segments are rejected because they do not represent
+a valid DMA transfer segment.
