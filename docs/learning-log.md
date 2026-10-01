@@ -38,3 +38,16 @@ The completion event is simulated through the event-driven simulator, allowing
 the controller to wait for a future simulation cycle instead of blocking real time.
 I also verified that multiple descriptors are processed sequentially and that
 invalid descriptors are rejected before entering the DMA controller.
+
+
+## Day 5 — PCIe TLP Model
+
+Today I implemented an architectural PCIe Transaction Layer Packet model.
+The simulator now represents Memory Read (MRd), Memory Write (MWr), Completion
+(Cpl), and Completion with Data (CplD) transactions. Each TLP contains requester
+ID, address, length, tag, byte-enable fields, and an optional payload. I also
+implemented a transaction engine that generates PCIe memory read and write
+requests. Tags are included so that the simulator can later model multiple
+outstanding requests and out-of-order completions. This model represents the
+PCIe transaction layer at an architectural level rather than implementing the
+physical layer or a complete PCIe protocol stack.
