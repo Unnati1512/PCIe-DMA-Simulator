@@ -12,6 +12,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(pcie_dma_simulator
     src/main.cpp
     src/simulator/simulator.cpp
+    src/memory/memory.cpp
 )
 
 target_include_directories(pcie_dma_simulator
