@@ -20,6 +20,7 @@ add_executable(pcie_dma_simulator
     src/pcie/outstanding_requests.cpp
     src/pcie/tlp_generator.cpp
     src/pcie/interrupt_coalescer.cpp
+    src/pcie/error.cpp
     src/pcie/tlp_printer.cpp
     src/pcie/transaction_engine.cpp
     src/pcie/link.cpp

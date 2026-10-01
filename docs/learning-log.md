@@ -191,3 +191,26 @@ The tests verified direct MSI-X delivery, threshold-based coalescing, and
 timer-based coalescing. With a threshold of four, eight completions generated
 two interrupts instead of eight. This establishes the foundation for later
 performance experiments comparing interrupt rate and notification latency.
+
+
+## Day 12 — Error Injection and Recovery
+
+Today I implemented controlled error injection and recovery for the PCIe DMA
+subsystem simulator. The error model supports completion timeouts, TLP errors,
+IOMMU translation faults, and invalid DMA descriptors.
+
+I implemented deterministic error injection using PCIe request tags so that
+specific requests can be forced to encounter a selected failure. This allows
+repeatable experiments instead of relying on random failures.
+
+I also implemented an error recovery manager that classifies errors as
+retryable or non-retryable. Completion timeouts and TLP errors are modeled as
+retryable, while translation faults and invalid descriptors are modeled as
+abort conditions.
+
+The tests verified four injected error types, retry behavior, successful
+recovery, and request abortion. Four errors were detected, two retries were
+attempted, one retry recovered successfully, and three requests were aborted.
+
+This establishes the foundation for later experiments measuring the impact
+of failures and recovery behavior on DMA performance.
