@@ -51,3 +51,27 @@ requests. Tags are included so that the simulator can later model multiple
 outstanding requests and out-of-order completions. This model represents the
 PCIe transaction layer at an architectural level rather than implementing the
 physical layer or a complete PCIe protocol stack.
+
+
+## Day 6 — PCIe Link and Bandwidth Model
+
+Today I implemented an architectural PCIe link model that connects the
+transaction layer to a simulated transmission path. The model represents
+PCIe generations, lane width, raw transfer rate, encoding efficiency,
+theoretical bandwidth, serialization time, and fixed transmission latency.
+
+For example, a Gen4 x16 link provides approximately 31.51 GB/s of theoretical
+payload bandwidth using the 16 GT/s lane rate, 16 lanes, and 128b/130b encoding
+efficiency. A 4096-byte transfer requires 130 simulated serialization cycles
+at the modeled 1 GHz simulation clock, followed by the configured 10-cycle
+fixed link latency.
+
+TLP transmission is represented as a simulation event rather than a real-time
+delay. This allows PCIe transmission latency to participate in end-to-end
+simulation timing. The model provides the foundation for later experiments
+involving PCIe bandwidth, MPS, request concurrency, TLP fragmentation, and
+link utilization.
+
+This implementation is an architectural model of PCIe transaction/link
+behavior and does not implement the physical layer or a complete PCIe
+protocol stack.

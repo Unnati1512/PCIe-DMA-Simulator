@@ -1,11 +1,23 @@
 #include <iostream>
 
+#include "pcie/link.hpp"
 #include "dma/dma_controller.hpp"
 #include "dma/descriptor_ring.hpp"
 #include "simulator/simulator.hpp"
 
 int main() {
     sim::Simulator simulator;
+    pcie::PcieLink pcie_link(
+    simulator,
+    pcie::PcieGeneration::Gen4,
+    16,
+    10
+);
+
+std::cout << "PCIe Link: Gen4 x16\n";
+std::cout << "Theoretical bandwidth: "
+          << pcie_link.theoretical_bandwidth_gbps()
+          << " GB/s\n";
 
     dma::DescriptorRing ring(4);
 
