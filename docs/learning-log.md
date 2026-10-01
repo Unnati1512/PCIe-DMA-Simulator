@@ -118,3 +118,27 @@ address for each segment, and receives an ordered tag.
 
 Zero-length scatter-gather segments are rejected because they do not represent
 a valid DMA transfer segment.
+
+
+## Day 9 — IOMMU and TLB
+
+Today I implemented an architectural IOMMU model that translates device-visible
+I/O virtual addresses (IOVAs) into physical addresses using a page-based
+mapping system. The model uses a 4096-byte page size and preserves the page
+offset during address translation.
+
+I also implemented a translation lookaside buffer (TLB) that caches recent
+IOVA-to-physical-page translations. A translation that is not present in the
+TLB causes a simulated page-table walk, after which the translation is inserted
+into the TLB. Subsequent accesses to the same page can therefore be completed
+as TLB hits without another page-table lookup.
+
+The simulator tracks TLB hits, TLB misses, page walks, and translation faults.
+Unmapped IOVAs generate translation faults, while invalid page-aligned mappings
+are rejected.
+
+I also tested the interaction between scatter-gather DMA and the IOMMU by
+representing scatter-gather segment addresses as IOVAs and translating each
+segment into its corresponding physical address. This establishes the address
+translation stage between the DMA scatter-gather layer and the later PCIe
+transaction model.

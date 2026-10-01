@@ -24,6 +24,7 @@ add_executable(pcie_dma_simulator
     src/pcie/tlp_fragmenter.cpp
     src/dma/scatter_gather.cpp
     src/dma/scatter_gather_engine.cpp
+    src/memory/iommu.cpp
 )
 
 target_include_directories(pcie_dma_simulator
