@@ -142,3 +142,31 @@ representing scatter-gather segment addresses as IOVAs and translating each
 segment into its corresponding physical address. This establishes the address
 translation stage between the DMA scatter-gather layer and the later PCIe
 transaction model.
+
+
+## Day 10 — Outstanding Requests and Out-of-Order Completions
+
+Today I implemented an outstanding-request tracker for the PCIe DMA
+architecture. The tracker allocates PCIe request tags, stores requests that
+are currently in flight, and matches returning completions to the original
+request using the tag.
+
+The model supports a configurable maximum number of outstanding requests.
+This allows the simulator to represent different levels of DMA request
+concurrency, from a single in-flight request to dozens of concurrent
+transactions.
+
+I also implemented out-of-order completion handling. Eight memory read
+requests were issued and their completions were deliberately returned in a
+different order. The tracker correctly matched every completion to its
+original request using the PCIe tag rather than assuming completion order
+matched issue order.
+
+The implementation also detects duplicate or unknown completions and tracks
+statistics for issued requests, completed requests, outstanding requests, and
+invalid completions.
+
+A concurrency experiment verified the request tracker at concurrency levels
+of 1, 2, 4, 8, 16, 32, and 64 outstanding requests. This establishes the
+foundation for later performance experiments involving request concurrency,
+latency hiding, and PCIe throughput.

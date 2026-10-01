@@ -17,6 +17,7 @@ add_executable(pcie_dma_simulator
     src/dma/descriptor_validator.cpp
     src/dma/dma_controller.cpp
     src/pcie/tlp_utils.cpp
+    src/pcie/outstanding_requests.cpp
     src/pcie/tlp_generator.cpp
     src/pcie/tlp_printer.cpp
     src/pcie/transaction_engine.cpp
