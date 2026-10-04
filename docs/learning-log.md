@@ -235,3 +235,107 @@ that a configured workload produces deterministic measurement results.
 This establishes the measurement infrastructure required for the next stage,
 where different DMA and PCIe configurations will be compared using generated
 CSV data and plots.
+
+
+# Day 14 — Performance Experiments and Analysis
+
+Today I used the architectural models developed in previous days to
+generate measurable experiment data and plots.
+
+## 1. Outstanding Request Concurrency
+
+The concurrency experiment evaluated the behavior of the outstanding
+request tracker at concurrency levels of 1, 2, 4, 8, 16, 32, and 64.
+
+The experiment verified that the request tracker can maintain the configured
+number of outstanding requests and correctly track issued and completed
+requests.
+
+The current experiment measures request-tracking capacity rather than
+physical PCIe latency.
+
+## 2. IOMMU and TLB Behavior
+
+The TLB experiment evaluated 1, 2, 4, 8, 16, 32, and 64 address translation
+accesses.
+
+The access pattern repeatedly used four virtual pages. The first access to
+each page caused a TLB miss and page walk. Subsequent accesses to those
+pages produced TLB hits.
+
+For 64 accesses, the experiment produced:
+
+- 60 TLB hits
+- 4 TLB misses
+- 4 page walks
+- 0 translation faults
+
+This demonstrates how TLB reuse reduces repeated page-table walks.
+
+## 3. PCIe MPS Fragmentation
+
+A fixed 16 KiB Memory Write transfer was fragmented using MPS values of
+128, 256, 512, 1024, 2048, and 4096 bytes.
+
+The number of generated TLPs decreased as MPS increased:
+
+- 128-byte MPS -> 128 TLPs
+- 256-byte MPS -> 64 TLPs
+- 512-byte MPS -> 32 TLPs
+- 1024-byte MPS -> 16 TLPs
+- 2048-byte MPS -> 8 TLPs
+- 4096-byte MPS -> 4 TLPs
+
+The total payload remained 16384 bytes for every configuration.
+
+This demonstrates the relationship between maximum payload size and PCIe
+transaction fragmentation.
+
+## 4. PCIe MRRS Fragmentation
+
+A fixed 16 KiB Memory Read request was fragmented using MRRS values of
+128, 256, 512, 1024, 2048, and 4096 bytes.
+
+The resulting TLP counts followed the same fragmentation relationship as
+the MPS experiment because the transfer started at a 4 KiB-aligned address
+and the tested sizes divided the transfer evenly.
+
+## 5. MSI-X Interrupt Coalescing
+
+Sixteen DMA completion events were processed using coalescing thresholds
+of 1, 2, 4, and 8.
+
+The results were:
+
+| Threshold | Interrupts | Maximum Notification Latency |
+|-----------|------------|------------------------------|
+| 1 | 16 | 0 cycles |
+| 2 | 8 | 10 cycles |
+| 4 | 4 | 30 cycles |
+| 8 | 2 | 70 cycles |
+
+Increasing the coalescing threshold reduced the number of MSI-X interrupts,
+but increased the maximum notification latency.
+
+This demonstrates the basic interrupt-rate versus notification-latency
+trade-off.
+
+## Analysis Output
+
+The experiments generated CSV datasets under:
+
+`benchmarks/data/`
+
+The following plots were generated with Matplotlib:
+
+- `concurrency.png`
+- `tlb.png`
+- `mps.png`
+- `interrupts.png`
+
+The plots are stored under:
+
+`benchmarks/plots/`
+
+These experiments provide the measurement and analysis layer required for
+the final integration and verification stage of the simulator.
