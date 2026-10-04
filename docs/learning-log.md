@@ -214,3 +214,24 @@ attempted, one retry recovered successfully, and three requests were aborted.
 
 This establishes the foundation for later experiments measuring the impact
 of failures and recovery behavior on DMA performance.
+
+
+## Day 13 — Performance Counters and Benchmark Infrastructure
+
+Today I implemented a performance-counter subsystem for the PCIe DMA
+architectural simulator. The counters track DMA operations, transferred
+bytes, PCIe TLP activity, memory reads and writes, outstanding requests,
+interrupts, TLB behavior, errors, retries, aborted requests, and latency.
+
+I also implemented a benchmark configuration and result abstraction so that
+experiments can be described using parameters such as transfer size and
+request concurrency. Each benchmark produces a structured result containing
+the performance-counter snapshot and simulated execution time.
+
+The performance-counter tests verified accumulation, maximum-value tracking,
+latency accounting, and counter reset behavior. The benchmark test verified
+that a configured workload produces deterministic measurement results.
+
+This establishes the measurement infrastructure required for the next stage,
+where different DMA and PCIe configurations will be compared using generated
+CSV data and plots.

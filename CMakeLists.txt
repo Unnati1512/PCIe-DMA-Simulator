@@ -12,6 +12,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(pcie_dma_simulator
     src/main.cpp
     src/simulator/simulator.cpp
+    src/simulator/performance_counters.cpp
+    src/simulator/benchmark.cpp
     src/memory/memory.cpp
     src/dma/descriptor_ring.cpp
     src/dma/descriptor_validator.cpp
