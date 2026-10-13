@@ -24,6 +24,7 @@ public:
     bool can_issue() const;
 
     Tag allocate_tag();
+    void release_tag(Tag tag);
 
     void track_request(
         Tag tag,

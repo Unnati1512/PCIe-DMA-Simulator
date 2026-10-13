@@ -1,10 +1,20 @@
+# Build outputs
 build/
+build-*/
+cmake-build-*/
+
+# Compiled artifacts
 *.o
 *.a
 *.so
-*.log
-*.tmp
+*.out
+
+# IDE/editor files
 .vscode/
 .idea/
-_pycache_/
-*.pyc
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

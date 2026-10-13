@@ -339,3 +339,29 @@ The plots are stored under:
 
 These experiments provide the measurement and analysis layer required for
 the final integration and verification stage of the simulator.
+
+
+# Day 15 — Final Integration and Verification
+
+Today I completed the final integration and verification stage of the
+PCIe DMA simulator.
+
+The project was reviewed as an architectural pipeline connecting the
+simulation framework, memory subsystem, DMA descriptor engine, PCIe TLP
+model, TLP fragmentation, scatter-gather processing, IOMMU/TLB,
+outstanding request tracking, MSI-X interrupt handling, error recovery,
+and performance measurement.
+
+I verified that the project builds through CMake and that the implemented
+components and benchmark infrastructure can be executed independently.
+
+The final verification also confirmed that the benchmark data and plots
+generated during Day 14 remain reproducible from the experiment programs.
+
+The final project documentation distinguishes architectural simulation
+from physical PCIe implementation and avoids claiming PCIe compliance or
+real hardware performance.
+
+The completed simulator provides a controlled environment for studying
+DMA and PCIe architectural trade-offs including request concurrency,
+address translation, TLP fragmentation, and interrupt coalescing.

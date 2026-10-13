@@ -38,3 +38,36 @@ target_include_directories(pcie_dma_simulator
         include
 )
 
+include(CTest)
+
+if(BUILD_TESTING)
+    add_executable(test_descriptor_ring
+        tests/test_descriptor_ring.cpp
+        src/dma/descriptor_ring.cpp
+        src/dma/descriptor_validator.cpp
+    )
+
+    target_include_directories(test_descriptor_ring
+        PRIVATE
+            include
+    )
+
+    add_test(
+        NAME descriptor_ring_regression
+        COMMAND test_descriptor_ring
+    )
+    add_executable(test_descriptor_validator
+        tests/test_descriptor_validator.cpp
+        src/dma/descriptor_validator.cpp
+    )
+
+    target_include_directories(test_descriptor_validator
+        PRIVATE
+            include
+    )
+
+    add_test(
+        NAME descriptor_validator_regression
+        COMMAND test_descriptor_validator
+    )
+endif()

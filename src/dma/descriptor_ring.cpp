@@ -46,6 +46,7 @@ bool DescriptorRing::submit(const Descriptor& descriptor) {
     if (full()) {
         return false;
     }
+
     if (!validate_descriptor(descriptor)) {
         return false;
     }
@@ -90,8 +91,8 @@ void DescriptorRing::consume() {
         );
     }
 
-    descriptors_[head_].status = DescriptorStatus::Completed;
-
+    // Do not overwrite the descriptor's terminal status.
+    // The caller must set Completed or Error before consuming it.
     head_ = (head_ + 1) % descriptors_.size();
     --count_;
 }
