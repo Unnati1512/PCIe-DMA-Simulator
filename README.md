@@ -1,167 +1,290 @@
-# PCIe DMA Subsystem Simulator
+# PCIe DMA Simulator
 
-An event-driven, cycle-based **C++17 simulator** that models a PCIe DMA data-transfer pipeline, including descriptor processing, address translation, PCIe Memory Read/Write transactions, outstanding-request tracking, and transfer verification.
+An event-driven C++17 architectural simulator for exploring PCIe DMA data transfers, address translation, PCIe transaction handling, and performance trade-offs.
 
-The project explores how a DMA subsystem coordinates memory transfers through a simplified PCIe transaction model.
+This project models a DMA transfer pipeline and includes component-level experiments for studying PCIe Transaction Layer Packets (TLPs), IOMMU/TLB behavior, outstanding request tracking, and MSI-X interrupt coalescing.
 
-> **Scope:** This is a software-based architectural simulator, not a physical PCIe controller, hardware DMA engine, or PCIe compliance implementation.
+> **Project scope:** This is an architectural simulator for learning and experimentation. It is not a physical PCIe controller, a Linux DMA driver, or a PCIe protocol compliance implementation.
 
-## Features
+## Project Status
 
-- **Event-driven simulation:** Schedule and execute operations at simulated clock cycles.
-- **DMA controller:** Process descriptors through a state-machine-driven transfer pipeline.
-- **Descriptor management:** Implement a descriptor ring and descriptor validation.
-- **PCIe transaction modelling:** Generate Memory Read (MRd) and Memory Write (MWr) Transaction Layer Packets (TLPs).
-- **Request tracking:** Manage outstanding requests, PCIe tags, completion, and request retirement.
-- **Address translation:** Integrate IOMMU address translation and TLB statistics.
-- **Simulated memory:** Schedule source-memory reads and destination-memory writes.
-- **Verification:** Compare source and destination data after a DMA transfer.
-- **Regression tests:** Test descriptor-ring and descriptor-validation behaviour.
+**Status: Architectural prototype — v0.1**
+
+The project includes an end-to-end DMA transfer demonstration and separate models and experiments for selected PCIe DMA subsystem components.
+
+The main demonstration verifies a 4,096-byte transfer through modeled Memory Read and Memory Write transactions. Additional experiments investigate fragmentation, address translation, request tracking, and interrupt coalescing.
+
+The end-to-end demonstration and component-level experiments have different integration levels. Results from standalone experiments should not be interpreted as proof that every component operates together in the main DMA pipeline.
 
 ## Architecture
 
 ```text
-        DMA Descriptor
-              |
-              v
-     Descriptor Ring
-     + Validation
-              |
-              v
-       DMA Controller
-        (State Machine)
-              |
-              v
-      IOMMU / TLB
-   Address Translation
-              |
-              v
-    PCIe Transaction Engine
-       MRd / MWr TLPs
-              |
-              v
-       PCIe Link Model
-              |
-              v
-      Simulated Memory
-       Read / Write
-              |
-              v
-      Data Verification
+                DMA Descriptor
+                      |
+                      v
+                DMA Controller
+                      |
+                      v
+             IOMMU / TLB Translation
+                      |
+                      v
+             PCIe Transaction Generation
+                      |
+                      v
+             Outstanding Request Tracking
+                      |
+                      v
+               Memory / Completion
+                      |
+                      v
+             Descriptor Status Update
+                      |
+                      v
+                Transfer Complete
 ```
 
-## How the Transfer Works
+The main DMA demonstration exercises descriptor processing, address translation, PCIe Memory Read and Memory Write transactions, scheduled memory operations, and descriptor completion.
 
-The demonstrated transfer follows this sequence:
+TLP fragmentation, request-concurrency behavior, and interrupt coalescing are modeled through separate component-level experiments rather than a fully integrated concurrent DMA pipeline.
 
-1. Fetch and validate the DMA descriptor.
-2. Translate the source and destination addresses.
-3. Generate and transmit a PCIe Memory Read request.
-4. Schedule a simulated source-memory read.
-5. Generate and transmit a Memory Write request containing the returned data.
-6. Schedule the destination-memory write.
-7. Update the descriptor state and return the DMA controller to idle.
-8. Compare the destination data with the source data.
+## Implemented Features
 
-The current end-to-end demonstration processes one descriptor and transfers 4096 bytes.
+### 1. Event-Driven Simulation
 
-## Technology Stack
+- Cycle-based event scheduling and execution.
+- Event ordering and scheduled callbacks.
+- Simulation execution up to a specified cycle.
 
-- **Language:** C++17
-- **Build system:** CMake
-- **Testing:** CTest
-- **Development environment:** Linux / Ubuntu
-- **Version control:** Git
+### 2. DMA Controller
+
+- DMA descriptor processing.
+- Descriptor validation.
+- Finite-state-machine-based transfer control.
+- Modeled source and destination address translation.
+- Sequential read-then-write transfer flow.
+- Descriptor completion and error-related handling.
+
+### 3. PCIe Transaction Modeling
+
+- Modeled Memory Read (MRd) requests.
+- Modeled Memory Write (MWr) requests.
+- Completion (Cpl) and Completion with Data (CplD) TLP types.
+- Simplified PCIe transaction timing.
+
+### 4. TLP Fragmentation
+
+- Maximum Payload Size (MPS)-based write fragmentation.
+- Maximum Read Request Size (MRRS)-based read fragmentation.
+- 4-KB boundary handling in the fragmentation component.
+- Fragment-count experiments across different configured sizes.
+
+### 5. IOMMU and TLB
+
+- Software-modeled address mappings.
+- TLB lookup behavior.
+- TLB hit and miss accounting.
+- Page-walk and translation-fault modeling.
+
+### 6. Outstanding Request Tracking
+
+- PCIe request tag tracking.
+- Request allocation and retirement.
+- Configurable outstanding-request limits.
+- Component-level concurrency experiments.
+
+### 7. Interrupt Modeling
+
+- MSI-X interrupt modeling.
+- Interrupt coalescing.
+- Experiments comparing interrupt counts and modeled notification latency.
+
+### 8. Performance Analysis
+
+- Simulation counters.
+- Standalone component-level experiments.
+- Benchmark analysis using Python and Matplotlib.
+
+## End-to-End DMA Demonstration
+
+The main executable demonstrates a 4,096-byte DMA transfer from source address `0x1000` to destination address `0x8000`.
+
+The modeled transfer follows these steps:
+
+1. A DMA descriptor is processed.
+2. Source and destination addresses are translated.
+3. A PCIe Memory Read request is issued.
+4. The modeled read data is returned.
+5. A PCIe Memory Write request is issued.
+6. The destination memory operation completes.
+7. The DMA controller marks the descriptor as complete.
+8. The destination data is compared against the source data.
+
+### Demonstrated Results
+
+| Metric | Result |
+|---|---:|
+| Transfer size | 4,096 bytes |
+| Simulation completion cycle | 290 |
+| PCIe TLP transmissions | 2 |
+| Modeled PCIe payload bytes | 8,192 |
+| IOMMU TLB hits | 0 |
+| IOMMU TLB misses | 2 |
+| Destination data verification | PASS |
+
+The final verification confirms that all 4,096 destination bytes match the source.
+
+These values describe the configured simulation model. They are not measurements of physical PCIe hardware performance.
+
+## Component-Level Experiments
+
+The `benchmarks/` directory contains standalone experiments that investigate selected subsystem behaviors.
+
+| Experiment | Objective |
+|---|---|
+| Outstanding request concurrency | Examine request-tracking capacity and PCIe tag usage |
+| IOMMU/TLB behavior | Examine translation hits, misses, and page walks |
+| MPS fragmentation | Examine Memory Write fragment counts |
+| MRRS fragmentation | Examine Memory Read request counts |
+| Interrupt coalescing | Examine interrupt counts and modeled notification latency |
+
+### MPS and MRRS Fragmentation
+
+For a 16-KiB transfer, the standalone fragmentation experiments report the following fragment counts:
+
+| Configured fragment/request size | Number of fragments |
+|---:|---:|
+| 128 bytes | 128 |
+| 256 bytes | 64 |
+| 512 bytes | 32 |
+| 1,024 bytes | 16 |
+| 2,048 bytes | 8 |
+| 4,096 bytes | 4 |
+
+These results illustrate how configured fragment sizes affect the number of modeled transactions for the tested transfer.
+
+### IOMMU/TLB Experiment
+
+The standalone TLB experiment accesses mapped pages and records translation behavior. One recorded experiment reports:
+
+| Metric | Result |
+|---|---:|
+| Accesses | 64 |
+| TLB hits | 60 |
+| TLB misses | 4 |
+| Page walks | 4 |
+| Translation faults | 0 |
+
+These results belong to the standalone experiment, not the end-to-end DMA demonstration.
+
+### Outstanding Request Concurrency
+
+The concurrency experiment evaluates request tracking at configured concurrency levels of 1, 2, 4, 8, 16, 32, and 64.
+
+Its completion-cycle values are synthetic values assigned by the experiment. They are not measured PCIe latencies or evidence of physical link throughput.
+
+### MSI-X Interrupt Coalescing
+
+The interrupt experiment models the effect of different coalescing thresholds on interrupt counts and notification latency.
+
+The results reflect the experiment's configured completion schedule and timing assumptions. They should not be interpreted as hardware measurements.
 
 ## Project Structure
 
 ```text
-PCIe-DMA-Simulator/
-├── include/       # Component headers
-├── src/           # Simulator implementation
-├── tests/         # Regression tests
-├── docs/          # Learning, experiment, and verification notes
+pcie-dma-simulator/
+├── include/
+│   ├── dma/
+│   ├── memory/
+│   ├── pcie/
+│   └── simulator/
+├── src/
+│   ├── dma/
+│   ├── memory/
+│   ├── pcie/
+│   ├── simulator/
+│   └── main.cpp
+├── tests/
+├── benchmarks/
+│   ├── concurrency_experiment.cpp
+│   ├── tlb_experiment.cpp
+│   ├── mps_experiment.cpp
+│   ├── mrrs_experiment.cpp
+│   ├── interrupt_experiment.cpp
+│   └── analyze.py
+├── docs/
+│   ├── learning-log.md
+│   ├── verification.md
+│   └── experiment-summary.md
 ├── CMakeLists.txt
 └── README.md
 ```
 
-## Build and Run
-
-### Prerequisites
+## Requirements
 
 - C++17-compatible compiler
-- CMake
-- Build tools
+- CMake 3.16 or later
+- Python 3
+- Matplotlib for benchmark analysis
 
-On Ubuntu:
+## Build and Run
 
-```bash
-sudo apt update
-sudo apt install build-essential cmake git
-```
+### Configure and Build
 
-### Build
+Run the following commands from the project root:
 
 ```bash
 cmake -S . -B build
 cmake --build build -j2
 ```
 
-### Run the simulator
+### Run the Simulator
 
 ```bash
 ./build/pcie_dma_simulator
 ```
 
-### Run regression tests
+The executable runs the end-to-end DMA demonstration and reports the simulated transfer progress and verification result.
+
+### Run Regression Tests
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-## Results
+The current CTest configuration registers the descriptor-ring and descriptor-validation regression tests.
 
-The verified end-to-end simulation used the following configuration:
+Additional test source files may exist in `tests/`, but files that are not registered with CTest are not automatically executed by this command.
 
-| Parameter | Result |
-|---|---|
-| PCIe configuration modelled | Gen4 x16 |
-| Source address | `0x1000` |
-| Destination address | `0x8000` |
-| Transfer size | 4096 bytes |
-| Simulation completion cycle | 290 |
-| Descriptors completed | 1 |
-| PCIe TLP transmissions | 2 |
-| PCIe bytes modelled | 8192 |
-| IOMMU TLB hits | 0 |
-| IOMMU TLB misses | 2 |
-| Data-integrity verification | PASS |
+### Run Benchmark Analysis
 
-**Verification result:** All 4096 destination bytes matched the source data.
+```bash
+python3 benchmarks/analyze.py
+```
 
-The automated regression suite also passed both existing tests:
-
-- `descriptor_ring_regression`
-- `descriptor_validator_regression`
-
-These results describe the current simulation and test suite. The reported cycle count and bandwidth figures are model outputs, not measurements of physical PCIe hardware.
+The analysis script processes the benchmark data available to it. The standalone experiment source files are not automatically compiled or executed by the standard CMake build unless corresponding build targets have been configured.
 
 ## Limitations
 
-- The simulator does not implement a physical PCIe endpoint or DMA engine.
-- PCIe electrical, PHY, and hardware-level behaviour are outside its scope.
-- It is not a complete PCIe protocol-compliance implementation.
-- The demonstrated end-to-end transfer covers one descriptor and one 4096-byte transfer.
-- The current regression suite covers descriptor-ring and descriptor-validation behaviour; it does not exhaustively verify every transaction-tracking or DMA error scenario.
-- Simulation timing and performance results should not be interpreted as real-hardware benchmarks.
+- The simulator does not implement a physical PCIe controller, electrical signaling, or PHY behavior.
+- PCIe transaction behavior is simplified and is not intended for protocol compliance testing.
+- The IOMMU is software-modeled and is not connected to a real operating-system or hardware IOMMU.
+- The main DMA demonstration uses a simplified, sequential read-then-write flow.
+- TLP fragmentation is modeled separately and is not integrated into the main DMA controller's transfer path.
+- The main DMA path does not demonstrate multiple concurrent outstanding DMA requests.
+- The main controller rejects transfers that cross the relevant 4-KB IOMMU page boundary rather than automatically splitting the transfer across translated pages.
+- Request tracking, fragmentation, and interrupt-coalescing experiments are component-level models rather than a fully integrated concurrent DMA implementation.
+- Simulation timing and bandwidth calculations depend on the implemented assumptions.
+- Theoretical link bandwidth is not equivalent to measured application throughput.
+- Benchmark results must not be interpreted as measurements of real PCIe hardware.
 
-## Future Improvements
+## Technologies
 
-- Add dedicated tests for outstanding-tag exhaustion, reuse, and invalid completions.
-- Test DMA error recovery and address-translation failures.
-- Extend verification to multiple descriptors and outstanding transactions.
-- Compare simulated performance across transfer sizes and outstanding-request limits.
-- Explore RTL implementation and FPGA deployment as a separate hardware-oriented extension.
+- C++17
+- CMake
+- Python
+- Matplotlib
+- Event-driven simulation
+- PCIe DMA architectural modeling
 
 ## Documentation
 
